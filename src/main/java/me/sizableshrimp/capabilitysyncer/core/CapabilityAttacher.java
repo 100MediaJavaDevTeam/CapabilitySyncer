@@ -17,7 +17,6 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,7 +37,10 @@ public abstract class CapabilityAttacher {
     };
 
     static {
-        MinecraftForge.EVENT_BUS.register(EventHandler.class);
+        MinecraftForge.EVENT_BUS.addGenericListener(Entity.class, CapabilityAttacher::onAttachCapability);
+        MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onEntityJoinWorld);
+        MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onPlayerStartTracking);
+        MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onPlayerClone);
     }
 
     @SuppressWarnings("unchecked")
@@ -115,38 +117,32 @@ public abstract class CapabilityAttacher {
         };
     }
 
-    public static final class EventHandler {
-        @SubscribeEvent
-        public static void onAttachCapability(AttachCapabilitiesEvent<Entity> event) {
-            // Attaches the capabilities
-            capAttachers.forEach(attacher -> attacher.accept(event, event.getObject()));
+    private static void onAttachCapability(AttachCapabilitiesEvent<Entity> event) {
+        // Attaches the capabilities
+        capAttachers.forEach(attacher -> attacher.accept(event, event.getObject()));
+    }
+
+    private static void onEntityJoinWorld(EntityJoinWorldEvent event) {
+        if (event.getEntity() instanceof ServerPlayerEntity) {
+            // Syncs a player's capabilities to themselves on world join (either joining server or switching worlds)
+            ServerPlayerEntity serverPlayer = (ServerPlayerEntity) event.getEntity();
+            capRetrievers.forEach(capRetriever -> capRetriever.apply(serverPlayer).ifPresent(cap -> cap.sendUpdatePacketToPlayer(serverPlayer)));
         }
+    }
 
-        @SubscribeEvent
-        public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
-            if (event.getEntity() instanceof ServerPlayerEntity) {
-                // Syncs a player's capabilities to themselves on world join (either joining server or switching worlds)
-                ServerPlayerEntity serverPlayer = (ServerPlayerEntity) event.getEntity();
-                capRetrievers.forEach(capRetriever -> capRetriever.apply(serverPlayer).ifPresent(cap -> cap.sendUpdatePacketToPlayer(serverPlayer)));
-            }
-        }
+    private static void onPlayerStartTracking(PlayerEvent.StartTracking event) {
+        // Syncs an entity's capabilities to a player when they start tracking it
+        ServerPlayerEntity currentPlayer = (ServerPlayerEntity) event.getPlayer();
+        capRetrievers.forEach(capRetriever -> capRetriever.apply(event.getTarget()).ifPresent(cap -> cap.sendUpdatePacketToPlayer(currentPlayer)));
+    }
 
-        @SubscribeEvent
-        public static void onPlayerStartTracking(PlayerEvent.StartTracking event) {
-            // Syncs an entity's capabilities to a player when they start tracking it
-            ServerPlayerEntity currentPlayer = (ServerPlayerEntity) event.getPlayer();
-            capRetrievers.forEach(capRetriever -> capRetriever.apply(event.getTarget()).ifPresent(cap -> cap.sendUpdatePacketToPlayer(currentPlayer)));
-        }
+    private static void onPlayerClone(PlayerEvent.Clone event) {
+        PlayerEntity oldPlayer = event.getOriginal();
+        PlayerEntity newPlayer = event.getPlayer();
 
-        @SubscribeEvent
-        public static void onPlayerClone(PlayerEvent.Clone event) {
-            PlayerEntity oldPlayer = event.getOriginal();
-            PlayerEntity newPlayer = event.getPlayer();
+        // So we can copy capabilities
+        oldPlayer.revive();
 
-            // So we can copy capabilities
-            oldPlayer.revive();
-
-            capCloners.forEach(capCloner -> capCloner.accept(oldPlayer, newPlayer));
-        }
+        capCloners.forEach(capCloner -> capCloner.accept(oldPlayer, newPlayer));
     }
 }
