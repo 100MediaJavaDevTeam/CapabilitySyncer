@@ -53,9 +53,9 @@ public abstract class CapabilityAttacher {
     private static final List<BiConsumer<PlayerEntity, PlayerEntity>> capCloners = new ArrayList<>();
 
     protected static <C extends ISyncableCapability> void registerPlayerAttacher(BiConsumer<AttachCapabilitiesEvent<Entity>, PlayerEntity> attacher,
-            Function<PlayerEntity, LazyOptional<C>> capRetriever, boolean persist) {
+            Function<PlayerEntity, LazyOptional<C>> capRetriever, boolean copyOnDeath) {
         registerAttacher(PlayerEntity.class, attacher, capRetriever);
-        if (persist) {
+        if (copyOnDeath) {
             capCloners.add((oldPlayer, newPlayer) -> capRetriever.apply(oldPlayer).ifPresent(oldCap -> capRetriever.apply(newPlayer)
                     .ifPresent(newCap -> newCap.deserializeNBT(oldCap.serializeNBT(false), false))));
         }
