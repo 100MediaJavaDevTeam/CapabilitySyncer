@@ -1,7 +1,7 @@
 package me.sizableshrimp.capabilitysyncer.core;
 
-import net.minecraft.entity.Entity;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraft.world.entity.Entity;
+import net.minecraftforge.network.PacketDistributor;
 
 public abstract class EntityCapability implements ISyncableCapability {
     protected final Entity entity;

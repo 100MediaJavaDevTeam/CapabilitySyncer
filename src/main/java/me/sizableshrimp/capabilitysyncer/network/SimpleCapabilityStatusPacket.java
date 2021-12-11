@@ -1,12 +1,12 @@
 package me.sizableshrimp.capabilitysyncer.network;
 
 import me.sizableshrimp.capabilitysyncer.core.ISyncableCapability;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.network.NetworkEvent;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.simple.SimpleChannel;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ public class SimpleCapabilityStatusPacket extends CapabilityStatusPacket {
     private static final Map<ResourceLocation, Function<Entity, ISyncableCapability>> capRetrievers = new HashMap<>();
     private final ResourceLocation capabilityId;
 
-    public SimpleCapabilityStatusPacket(int entityId, ResourceLocation capabilityId, CompoundNBT tag) {
+    public SimpleCapabilityStatusPacket(int entityId, ResourceLocation capabilityId, CompoundTag tag) {
         super(entityId, tag);
         this.capabilityId = capabilityId;
     }
@@ -27,7 +27,7 @@ public class SimpleCapabilityStatusPacket extends CapabilityStatusPacket {
     }
 
     @Override
-    public void write(PacketBuffer buf) {
+    public void write(FriendlyByteBuf buf) {
         super.write(buf);
         buf.writeResourceLocation(capabilityId);
     }

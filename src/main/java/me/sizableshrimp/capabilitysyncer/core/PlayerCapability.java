@@ -1,11 +1,11 @@
 package me.sizableshrimp.capabilitysyncer.core;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 
 public abstract class PlayerCapability extends EntityCapability {
-    protected final PlayerEntity player;
+    protected final Player player;
 
-    protected PlayerCapability(PlayerEntity player) {
+    protected PlayerCapability(Player player) {
         super(player);
         this.player = player;
     }

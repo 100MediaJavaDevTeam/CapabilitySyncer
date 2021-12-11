@@ -1,17 +1,17 @@
 package me.sizableshrimp.capabilitysyncer.core;
 
 import me.sizableshrimp.capabilitysyncer.network.CapabilityStatusPacket;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.simple.SimpleChannel;
 
-public interface ISyncableCapability extends INBTSavable<CompoundNBT> {
+public interface ISyncableCapability extends INBTSavable<CompoundTag> {
     void updateTracking();
 
     CapabilityStatusPacket createUpdatePacket();
 
-    default void sendUpdatePacketToPlayer(ServerPlayerEntity serverPlayer) {
+    default void sendUpdatePacketToPlayer(ServerPlayer serverPlayer) {
         getNetworkChannel().send(PacketDistributor.PLAYER.with(() -> serverPlayer), this.createUpdatePacket());
     }
 

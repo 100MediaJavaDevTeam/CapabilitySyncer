@@ -1,15 +1,16 @@
 package me.sizableshrimp.capabilitysyncer.core;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -26,16 +27,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public abstract class CapabilityAttacher {
-    @SuppressWarnings("rawtypes")
-    private static final Capability.IStorage EMPTY_STORAGE = new Capability.IStorage() {
-        @Nullable
-        @Override
-        public INBT writeNBT(Capability capability, Object instance, Direction side) {return new CompoundNBT();}
-
-        @Override
-        public void readNBT(Capability capability, Object instance, Direction side, INBT nbt) {}
-    };
-
     static {
         MinecraftForge.EVENT_BUS.addGenericListener(Entity.class, CapabilityAttacher::onAttachCapability);
         MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onEntityJoinWorld);
@@ -43,18 +34,17 @@ public abstract class CapabilityAttacher {
         MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onPlayerClone);
     }
 
-    @SuppressWarnings("unchecked")
-    protected static <T> void registerCapability(Class<T> capClass) {
-        CapabilityManager.INSTANCE.register(capClass, (Capability.IStorage<T>) EMPTY_STORAGE, () -> null);
+    protected static <T> Capability<T> getCapability(CapabilityToken<T> type) {
+        return CapabilityManager.INSTANCE.get(type);
     }
 
     private static final List<BiConsumer<AttachCapabilitiesEvent<Entity>, Entity>> capAttachers = new ArrayList<>();
     private static final List<Function<Entity, LazyOptional<? extends ISyncableCapability>>> capRetrievers = new ArrayList<>();
-    private static final List<BiConsumer<PlayerEntity, PlayerEntity>> capCloners = new ArrayList<>();
+    private static final List<BiConsumer<Player, Player>> capCloners = new ArrayList<>();
 
-    protected static <C extends ISyncableCapability> void registerPlayerAttacher(BiConsumer<AttachCapabilitiesEvent<Entity>, PlayerEntity> attacher,
-            Function<PlayerEntity, LazyOptional<C>> capRetriever, boolean copyOnDeath) {
-        registerAttacher(PlayerEntity.class, attacher, capRetriever);
+    protected static <C extends ISyncableCapability> void registerPlayerAttacher(BiConsumer<AttachCapabilitiesEvent<Entity>, Player> attacher,
+            Function<Player, LazyOptional<C>> capRetriever, boolean copyOnDeath) {
+        registerAttacher(Player.class, attacher, capRetriever);
         if (copyOnDeath) {
             capCloners.add((oldPlayer, newPlayer) -> capRetriever.apply(oldPlayer).ifPresent(oldCap -> capRetriever.apply(newPlayer)
                     .ifPresent(newCap -> newCap.deserializeNBT(oldCap.serializeNBT(false), false))));
@@ -71,11 +61,11 @@ public abstract class CapabilityAttacher {
         capRetrievers.add(entity -> entityClass.isInstance(entity) ? capRetriever.apply((E) entity) : LazyOptional.empty());
     }
 
-    protected static <I extends INBTSerializable<T>, T extends INBT> void genericAttachCapability(AttachCapabilitiesEvent<?> event, I impl, Capability<I> capability, ResourceLocation location) {
+    protected static <I extends INBTSerializable<T>, T extends Tag> void genericAttachCapability(AttachCapabilitiesEvent<?> event, I impl, Capability<I> capability, ResourceLocation location) {
         genericAttachCapability(event, impl, capability, location, true);
     }
 
-    protected static <I extends INBTSerializable<T>, T extends INBT> void genericAttachCapability(AttachCapabilitiesEvent<?> event, I impl, Capability<I> capability, ResourceLocation location,
+    protected static <I extends INBTSerializable<T>, T extends Tag> void genericAttachCapability(AttachCapabilitiesEvent<?> event, I impl, Capability<I> capability, ResourceLocation location,
             boolean save) {
         LazyOptional<I> storage = LazyOptional.of(() -> impl);
         ICapabilityProvider provider = getProvider(impl, storage, capability, save);
@@ -83,7 +73,7 @@ public abstract class CapabilityAttacher {
         event.addListener(storage::invalidate);
     }
 
-    protected static <I extends INBTSerializable<T>, T extends INBT> ICapabilityProvider getProvider(I impl, LazyOptional<I> storage, Capability<I> capability, boolean save) {
+    protected static <I extends INBTSerializable<T>, T extends Tag> ICapabilityProvider getProvider(I impl, LazyOptional<I> storage, Capability<I> capability, boolean save) {
         if (capability == null)
             throw new NullPointerException();
         return save ? new ICapabilitySerializable<T>() {
@@ -123,22 +113,22 @@ public abstract class CapabilityAttacher {
     }
 
     private static void onEntityJoinWorld(EntityJoinWorldEvent event) {
-        if (event.getEntity() instanceof ServerPlayerEntity) {
+        if (event.getEntity() instanceof ServerPlayer) {
             // Syncs a player's capabilities to themselves on world join (either joining server or switching worlds)
-            ServerPlayerEntity serverPlayer = (ServerPlayerEntity) event.getEntity();
+            ServerPlayer serverPlayer = (ServerPlayer) event.getEntity();
             capRetrievers.forEach(capRetriever -> capRetriever.apply(serverPlayer).ifPresent(cap -> cap.sendUpdatePacketToPlayer(serverPlayer)));
         }
     }
 
     private static void onPlayerStartTracking(PlayerEvent.StartTracking event) {
         // Syncs an entity's capabilities to a player when they start tracking it
-        ServerPlayerEntity currentPlayer = (ServerPlayerEntity) event.getPlayer();
+        ServerPlayer currentPlayer = (ServerPlayer) event.getPlayer();
         capRetrievers.forEach(capRetriever -> capRetriever.apply(event.getTarget()).ifPresent(cap -> cap.sendUpdatePacketToPlayer(currentPlayer)));
     }
 
     private static void onPlayerClone(PlayerEvent.Clone event) {
-        PlayerEntity oldPlayer = event.getOriginal();
-        PlayerEntity newPlayer = event.getPlayer();
+        Player oldPlayer = event.getOriginal();
+        Player newPlayer = event.getPlayer();
 
         // So we can copy capabilities
         oldPlayer.revive();

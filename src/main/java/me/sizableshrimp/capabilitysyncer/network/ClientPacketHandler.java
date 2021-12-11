@@ -2,8 +2,8 @@ package me.sizableshrimp.capabilitysyncer.network;
 
 import me.sizableshrimp.capabilitysyncer.core.ISyncableCapability;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.Entity;
 
 import java.util.function.Function;
 
@@ -14,12 +14,12 @@ class ClientPacketHandler {
             capability.deserializeNBT(packet.getTag(), false);
     }
 
+    @SuppressWarnings("unchecked")
     private static <T extends Entity> T getEntity(int entityId) {
-        ClientWorld level = Minecraft.getInstance().level;
+        ClientLevel level = Minecraft.getInstance().level;
         if (level == null)
             return null;
         Entity entity = level.getEntity(entityId);
-        //noinspection unchecked
         return (T) entity;
     }
 }

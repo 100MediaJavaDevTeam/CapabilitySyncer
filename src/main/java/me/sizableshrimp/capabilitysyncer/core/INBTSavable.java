@@ -1,9 +1,9 @@
 package me.sizableshrimp.capabilitysyncer.core;
 
-import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.Tag;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public interface INBTSavable<T extends INBT> extends INBTSerializable<T> {
+public interface INBTSavable<T extends Tag> extends INBTSerializable<T> {
     /**
      * @deprecated Use {@link #serializeNBT(boolean)}
      */
