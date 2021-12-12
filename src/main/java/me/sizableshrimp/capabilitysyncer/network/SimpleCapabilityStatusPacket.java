@@ -1,10 +1,10 @@
 package me.sizableshrimp.capabilitysyncer.network;
 
 import me.sizableshrimp.capabilitysyncer.core.ISyncableCapability;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.simple.SimpleChannel;
 

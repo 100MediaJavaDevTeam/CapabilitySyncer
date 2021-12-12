@@ -1,8 +1,8 @@
 package me.sizableshrimp.capabilitysyncer.core;
 
 import me.sizableshrimp.capabilitysyncer.network.CapabilityStatusPacket;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
