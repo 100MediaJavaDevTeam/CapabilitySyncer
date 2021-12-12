@@ -193,6 +193,10 @@ processResources {
     }
 }
 
+java {
+    withSourcesJar()
+}
+
 jar {
     manifest {
         attributes([
@@ -218,6 +222,7 @@ publishing {
         mavenJava(MavenPublication) {
             artifactId = mod_id
             artifact jar
+            artifact sourcesJar
         }
     }
     repositories {
