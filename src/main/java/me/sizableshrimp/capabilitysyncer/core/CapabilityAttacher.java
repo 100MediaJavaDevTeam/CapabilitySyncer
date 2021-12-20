@@ -1,11 +1,13 @@
 package me.sizableshrimp.capabilitysyncer.core;
 
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -40,7 +42,9 @@ public abstract class CapabilityAttacher {
     }
 
     private static final List<BiConsumer<AttachCapabilitiesEvent<Entity>, Entity>> capAttachers = new ArrayList<>();
+    private static final List<BiConsumer<AttachCapabilitiesEvent<ItemStack>, ItemStack>> itemStackCapAttachers = new ArrayList<>();
     private static final List<Function<Entity, LazyOptional<? extends ISyncableCapability>>> capRetrievers = new ArrayList<>();
+    private static final List<Function<ItemStack, LazyOptional<? extends ItemStackCapability>>> itemStackCapRetrievers = new ArrayList<>();
     private static final List<BiConsumer<Player, Player>> capCloners = new ArrayList<>();
 
     protected static <C extends ISyncableCapability> void registerPlayerAttacher(BiConsumer<AttachCapabilitiesEvent<Entity>, Player> attacher,
@@ -61,6 +65,17 @@ public abstract class CapabilityAttacher {
         });
         capRetrievers.add(entity -> entityClass.isInstance(entity) ? capRetriever.apply((E) entity) : LazyOptional.empty());
     }
+
+    protected static <S extends ItemStack, C extends ItemStackCapability> void registerItemStackAttacher(Class<S> itemStackClass, BiConsumer<AttachCapabilitiesEvent<ItemStack>, S> attacher,
+                                                                                                     Function<S, LazyOptional<C>> capRetriever) {
+        itemStackCapAttachers.add((event, itemStack) -> {
+            if (itemStackClass.isInstance(itemStack))
+                attacher.accept(event, (S) itemStack);
+        });
+        itemStackCapRetrievers.add(itemStack -> itemStackClass.isInstance(itemStack) ? capRetriever.apply((S) itemStack) : LazyOptional.empty());
+    }
+
+
 
     protected static <I extends INBTSerializable<T>, T extends Tag> void genericAttachCapability(AttachCapabilitiesEvent<?> event, I impl, Capability<I> capability, ResourceLocation location) {
         genericAttachCapability(event, impl, capability, location, true);
@@ -107,7 +122,10 @@ public abstract class CapabilityAttacher {
             }
         };
     }
-
+    private static void onAttachItemStackCapability(AttachCapabilitiesEvent<ItemStack> event) {
+        // Attaches the capabilities
+        itemStackCapAttachers.forEach(attacher -> attacher.accept(event, event.getObject()));
+    }
     private static void onAttachCapability(AttachCapabilitiesEvent<Entity> event) {
         // Attaches the capabilities
         capAttachers.forEach(attacher -> attacher.accept(event, event.getObject()));
