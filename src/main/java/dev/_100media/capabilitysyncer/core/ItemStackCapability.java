@@ -1,4 +1,4 @@
-package me.sizableshrimp.capabilitysyncer.core;
+package dev._100media.capabilitysyncer.core;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;

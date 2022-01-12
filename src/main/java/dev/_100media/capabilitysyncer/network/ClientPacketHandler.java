@@ -1,6 +1,6 @@
-package me.sizableshrimp.capabilitysyncer.network;
+package dev._100media.capabilitysyncer.network;
 
-import me.sizableshrimp.capabilitysyncer.core.ISyncableCapability;
+import dev._100media.capabilitysyncer.core.ISyncableCapability;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;

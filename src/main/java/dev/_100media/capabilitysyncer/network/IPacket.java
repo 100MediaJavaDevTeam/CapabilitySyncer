@@ -1,4 +1,4 @@
-package me.sizableshrimp.capabilitysyncer.network;
+package dev._100media.capabilitysyncer.network;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkDirection;

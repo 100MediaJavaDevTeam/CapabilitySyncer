@@ -1,4 +1,4 @@
-package me.sizableshrimp.capabilitysyncer.core;
+package dev._100media.capabilitysyncer.core;
 
 import net.minecraft.nbt.INBT;
 import net.minecraftforge.common.util.INBTSerializable;
