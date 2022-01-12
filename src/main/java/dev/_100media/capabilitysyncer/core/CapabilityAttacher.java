@@ -42,14 +42,14 @@ public abstract class CapabilityAttacher {
     }
 
     private static final List<BiConsumer<AttachCapabilitiesEvent<Entity>, Entity>> entityCapAttachers = new ArrayList<>();
-    private static final List<Function<Entity, LazyOptional<? extends ISyncableCapability>>> entityCapRetrievers = new ArrayList<>();
+    private static final List<Function<Entity, LazyOptional<? extends ISyncableEntityCapability>>> entityCapRetrievers = new ArrayList<>();
 
     private static final List<BiConsumer<AttachCapabilitiesEvent<ItemStack>, ItemStack>> itemStackCapAttachers = new ArrayList<>();
     private static final List<Function<ItemStack, LazyOptional<? extends ItemStackCapability>>> itemStackCapRetrievers = new ArrayList<>();
 
     private static final List<BiConsumer<Player, Player>> playerCapCloners = new ArrayList<>();
 
-    protected static <C extends ISyncableCapability> void registerPlayerAttacher(BiConsumer<AttachCapabilitiesEvent<Entity>, Player> attacher,
+    protected static <C extends ISyncableEntityCapability> void registerPlayerAttacher(BiConsumer<AttachCapabilitiesEvent<Entity>, Player> attacher,
             Function<Player, LazyOptional<C>> capRetriever, boolean copyOnDeath) {
         registerEntityAttacher(Player.class, attacher, capRetriever);
         if (copyOnDeath) {
@@ -59,7 +59,7 @@ public abstract class CapabilityAttacher {
     }
 
     @SuppressWarnings("unchecked")
-    protected static <E extends Entity, C extends ISyncableCapability> void registerEntityAttacher(Class<E> entityClass, BiConsumer<AttachCapabilitiesEvent<Entity>, E> attacher,
+    protected static <E extends Entity, C extends ISyncableEntityCapability> void registerEntityAttacher(Class<E> entityClass, BiConsumer<AttachCapabilitiesEvent<Entity>, E> attacher,
             Function<E, LazyOptional<C>> capRetriever) {
         entityCapAttachers.add((event, entity) -> {
             if (entityClass.isInstance(entity))

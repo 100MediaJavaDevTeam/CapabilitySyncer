@@ -1,6 +1,6 @@
 package dev._100media.capabilitysyncer.network;
 
-import dev._100media.capabilitysyncer.core.ISyncableCapability;
+import dev._100media.capabilitysyncer.core.ISyncableEntityCapability;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -12,16 +12,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public class SimpleCapabilityStatusPacket extends CapabilityStatusPacket {
-    private static final Map<ResourceLocation, Function<Entity, ISyncableCapability>> capRetrievers = new HashMap<>();
+public class SimpleEntityCapabilityStatusPacket extends EntityCapabilityStatusPacket {
+    private static final Map<ResourceLocation, Function<Entity, ISyncableEntityCapability>> capRetrievers = new HashMap<>();
     private final ResourceLocation capabilityId;
 
-    public SimpleCapabilityStatusPacket(int entityId, ResourceLocation capabilityId, CompoundTag tag) {
+    public SimpleEntityCapabilityStatusPacket(int entityId, ResourceLocation capabilityId, CompoundTag tag) {
         super(entityId, tag);
         this.capabilityId = capabilityId;
     }
 
-    public SimpleCapabilityStatusPacket(int entityId, ResourceLocation capabilityId, ISyncableCapability capability) {
+    public SimpleEntityCapabilityStatusPacket(int entityId, ResourceLocation capabilityId, ISyncableEntityCapability capability) {
         super(entityId, capability);
         this.capabilityId = capabilityId;
     }
@@ -38,8 +38,8 @@ public class SimpleCapabilityStatusPacket extends CapabilityStatusPacket {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Entity> void register(ResourceLocation capabilityId, Function<T, ISyncableCapability> capabilityRetriever, SimpleChannel channel, int id) {
-        capRetrievers.put(capabilityId, (Function<Entity, ISyncableCapability>) capabilityRetriever);
-        register(channel, id, SimpleCapabilityStatusPacket.class, buf -> read(buf, (entityId, tag) -> new SimpleCapabilityStatusPacket(entityId, buf.readResourceLocation(), tag)));
+    public static <T extends Entity> void register(ResourceLocation capabilityId, Function<T, ISyncableEntityCapability> capabilityRetriever, SimpleChannel channel, int id) {
+        capRetrievers.put(capabilityId, (Function<Entity, ISyncableEntityCapability>) capabilityRetriever);
+        register(channel, id, SimpleEntityCapabilityStatusPacket.class, buf -> read(buf, (entityId, tag) -> new SimpleEntityCapabilityStatusPacket(entityId, buf.readResourceLocation(), tag)));
     }
 }
