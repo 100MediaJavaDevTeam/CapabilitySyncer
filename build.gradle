@@ -193,6 +193,10 @@ dependencies {
 //     }
 // }
 
+java {
+    withSourcesJar()
+}
+
 jar {
     manifest {
         attributes([
@@ -219,11 +223,20 @@ publishing {
         mavenJava(MavenPublication) {
             artifactId = mod_id
             artifact jar
+            artifact sourcesJar
         }
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/mcmodsrepo"
+            name = '100Media'
+            url = 'https://maven.100media.dev/' + (project.version.endsWith('-SNAPSHOT') ? 'main-snapshots' : 'main-releases')
+            credentials {
+                username = project.getProperty('hm_maven_username')
+                password = project.getProperty('hm_maven_password')
+            }
+            authentication {
+                basic(BasicAuthentication)
+            }
         }
     }
 }
