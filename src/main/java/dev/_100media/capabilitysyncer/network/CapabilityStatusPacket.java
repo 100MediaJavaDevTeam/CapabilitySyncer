@@ -1,6 +1,6 @@
-package me.sizableshrimp.capabilitysyncer.network;
+package dev._100media.capabilitysyncer.network;
 
-import me.sizableshrimp.capabilitysyncer.core.ISyncableCapability;
+import dev._100media.capabilitysyncer.core.ISyncableCapability;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkDirection;

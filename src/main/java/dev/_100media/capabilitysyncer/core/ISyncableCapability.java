@@ -1,6 +1,6 @@
-package me.sizableshrimp.capabilitysyncer.core;
+package dev._100media.capabilitysyncer.core;
 
-import me.sizableshrimp.capabilitysyncer.network.CapabilityStatusPacket;
+import dev._100media.capabilitysyncer.network.CapabilityStatusPacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.PacketDistributor;

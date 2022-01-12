@@ -1,4 +1,4 @@
-package me.sizableshrimp.capabilitysyncer.network;
+package dev._100media.capabilitysyncer.network;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkDirection;

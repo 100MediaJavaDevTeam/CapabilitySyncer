@@ -1,4 +1,4 @@
-package me.sizableshrimp.capabilitysyncer.core;
+package dev._100media.capabilitysyncer.core;
 
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.Tag;
