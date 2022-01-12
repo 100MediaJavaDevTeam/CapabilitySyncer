@@ -229,7 +229,7 @@ publishing {
     repositories {
         maven {
             name = '100Media'
-            url = 'https://maven.100media.dev/' + (project.version.endsWith('-SNAPSHOT') ? 'main-snapshots' : 'main-releases')
+            url = 'https://maven.100media.dev/' + (project.version.endsWith('-SNAPSHOT') ? 'public-snapshots' : 'public-releases')
             credentials {
                 username = project.getProperty('hm_maven_username')
                 password = project.getProperty('hm_maven_password')
