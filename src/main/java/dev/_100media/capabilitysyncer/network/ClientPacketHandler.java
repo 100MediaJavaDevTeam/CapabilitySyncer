@@ -1,6 +1,6 @@
 package dev._100media.capabilitysyncer.network;
 
-import dev._100media.capabilitysyncer.core.ISyncableCapability;
+import dev._100media.capabilitysyncer.core.ISyncableEntityCapability;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
@@ -8,8 +8,8 @@ import net.minecraft.entity.Entity;
 import java.util.function.Function;
 
 class ClientPacketHandler {
-    static <T extends Entity> void handleCapabilityStatus(CapabilityStatusPacket packet, Function<T, ISyncableCapability> capabilityRetriever) {
-        ISyncableCapability capability = capabilityRetriever.apply(getEntity(packet.getEntityId()));
+    static <T extends Entity> void handleEntityCapabilityStatus(EntityCapabilityStatusPacket packet, Function<T, ISyncableEntityCapability> capabilityRetriever) {
+        ISyncableEntityCapability capability = capabilityRetriever.apply(getEntity(packet.getEntityId()));
         if (capability != null)
             capability.deserializeNBT(packet.getTag(), false);
     }
