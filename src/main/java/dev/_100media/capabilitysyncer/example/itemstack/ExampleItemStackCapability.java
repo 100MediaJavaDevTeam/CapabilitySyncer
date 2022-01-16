@@ -2,34 +2,39 @@ package dev._100media.capabilitysyncer.example.itemstack;
 
 import dev._100media.capabilitysyncer.core.ItemStackCapability;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 
 public class ExampleItemStackCapability extends ItemStackCapability {
-    private boolean cool = false;
+    private int exampleInt = 5;
 
     public ExampleItemStackCapability(ItemStack itemStack) {
         super(itemStack);
     }
 
-    public boolean isCool() {
-        return cool;
+    public int getExampleInt() {
+        return exampleInt;
     }
 
-    public void setCool(boolean cool) {
-        this.cool = cool;
+    public void setExampleInt(int exampleInt) {
+        this.exampleInt = exampleInt;
     }
 
     @Override
     public CompoundTag serializeNBT(boolean savingToDisk) {
         CompoundTag nbt = new CompoundTag();
 
-        nbt.putBoolean("Cool", this.cool);
+        nbt.putInt("ExampleInt", this.exampleInt);
 
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt, boolean readingFromDisk) {
-        this.cool = nbt.getBoolean("Cool");
+        if (nbt.contains("ExampleInt", Tag.TAG_INT)) {
+            this.exampleInt = nbt.getInt("ExampleInt");
+        } else {
+            this.exampleInt = 5;
+        }
     }
 }
