@@ -19,8 +19,12 @@ public class ExamplePlayerCapability extends PlayerCapability {
         return exampleInt;
     }
 
-    public void setExampleInt(int exampleInt) {
+    public void setExampleInt(int exampleInt, boolean sync) {
         this.exampleInt = exampleInt;
+        if (sync) {
+            // Send an update packet to all tracking clients
+            this.updateTracking();
+        }
     }
 
     @Override
