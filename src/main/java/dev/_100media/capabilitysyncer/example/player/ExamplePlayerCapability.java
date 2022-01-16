@@ -5,35 +5,44 @@ import dev._100media.capabilitysyncer.network.EntityCapabilityStatusPacket;
 import dev._100media.capabilitysyncer.network.SimpleEntityCapabilityStatusPacket;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 
 public class ExamplePlayerCapability extends PlayerCapability {
-    private boolean cool = false;
+    private int exampleInt = 5;
 
     public ExamplePlayerCapability(PlayerEntity player) {
         super(player);
     }
 
-    public boolean isCool() {
-        return cool;
+    public int getExampleInt() {
+        return exampleInt;
     }
 
-    public void setCool(boolean cool) {
-        this.cool = cool;
+    public void setExampleInt(int exampleInt, boolean sync) {
+        this.exampleInt = exampleInt;
+        if (sync) {
+            // Send an update packet to all tracking clients
+            this.updateTracking();
+        }
     }
 
     @Override
     public CompoundNBT serializeNBT(boolean savingToDisk) {
         CompoundNBT nbt = new CompoundNBT();
 
-        nbt.putBoolean("Cool", this.cool);
+        nbt.putInt("ExampleInt", this.exampleInt);
 
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt, boolean readingFromDisk) {
-        this.cool = nbt.getBoolean("Cool");
+        if (nbt.contains("ExampleInt", Constants.NBT.TAG_INT)) {
+            this.exampleInt = nbt.getInt("ExampleInt");
+        } else {
+            this.exampleInt = 5;
+        }
     }
 
     @Override
