@@ -12,6 +12,7 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import javax.annotation.Nullable;
 
 public class ExamplePlayerCapabilityAttacher extends CapabilityAttacher {
+    private static final Class<ExamplePlayerCapability> CAPABILITY_CLASS = ExamplePlayerCapability.class;
     public static final Capability<ExamplePlayerCapability> EXAMPLE_PLAYER_CAPABILITY = getCapability(new CapabilityToken<>() {});
     public static final ResourceLocation EXAMPLE_PLAYER_CAPABILITY_RL = new ResourceLocation("example", "example_player_capability");
 
@@ -29,6 +30,7 @@ public class ExamplePlayerCapabilityAttacher extends CapabilityAttacher {
     }
 
     public static void register() {
+        CapabilityAttacher.registerCapability(CAPABILITY_CLASS);
         CapabilityAttacher.registerPlayerAttacher(ExamplePlayerCapabilityAttacher::attach, ExamplePlayerCapabilityAttacher::getExamplePlayerCapability, true);
     }
 }

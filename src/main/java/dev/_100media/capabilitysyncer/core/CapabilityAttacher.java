@@ -13,11 +13,14 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
+import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
@@ -34,11 +37,20 @@ public abstract class CapabilityAttacher {
         MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onEntityJoinWorld);
         MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onPlayerStartTracking);
         MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onPlayerClone);
+
+        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modBus.addListener(CapabilityAttacher::onRegisterCapabilities);
     }
+
+    private static final List<Class<?>> capClasses = new ArrayList<>();
 
     @NotNull
     protected static <T> Capability<T> getCapability(CapabilityToken<T> type) {
         return CapabilityManager.get(type);
+    }
+
+    protected static <T> void registerCapability(Class<T> capClass) {
+        capClasses.add(capClass);
     }
 
     private static final List<BiConsumer<AttachCapabilitiesEvent<Entity>, Entity>> entityCapAttachers = new ArrayList<>();
@@ -118,6 +130,11 @@ public abstract class CapabilityAttacher {
                 return cap == capability ? storage.cast() : LazyOptional.empty();
             }
         };
+    }
+
+    private static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
+        // Registers the capability classes
+        capClasses.forEach(event::register);
     }
 
     private static void onAttachEntityCapability(AttachCapabilitiesEvent<Entity> event) {

@@ -11,6 +11,7 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import javax.annotation.Nullable;
 
 public class ExampleItemStackCapabilityAttacher extends CapabilityAttacher {
+    private static final Class<ExampleItemStackCapability> CAPABILITY_CLASS = ExampleItemStackCapability.class;
     public static final Capability<ExampleItemStackCapability> EXAMPLE_ITEM_STACK_CAPABILITY = getCapability(new CapabilityToken<>() {});
     public static final ResourceLocation EXAMPLE_PLAYER_CAPABILITY_RL = new ResourceLocation("example", "example_item_stack_capability");
 
@@ -28,6 +29,7 @@ public class ExampleItemStackCapabilityAttacher extends CapabilityAttacher {
     }
 
     public static void register() {
+        CapabilityAttacher.registerCapability(CAPABILITY_CLASS);
         CapabilityAttacher.registerItemStackAttacher(ExampleItemStackCapabilityAttacher::attach, ExampleItemStackCapabilityAttacher::getExampleItemStackCapability);
     }
 }
