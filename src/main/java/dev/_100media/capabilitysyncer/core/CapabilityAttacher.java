@@ -95,7 +95,9 @@ public abstract class CapabilityAttacher {
         LazyOptional<I> storage = LazyOptional.of(() -> impl);
         ICapabilityProvider provider = getProvider(impl, storage, capability, save);
         event.addCapability(location, provider);
-        event.addListener(storage::invalidate);
+        // Forge 1.17/1.18 introduced a bug where invalidating the storage causes the capability data to be inaccessible from clone even with revive.
+        // So, don't invalidate the storage.
+        // event.addListener(storage::invalidate);
     }
 
     protected static <I extends INBTSerializable<T>, T extends Tag> ICapabilityProvider getProvider(I impl, LazyOptional<I> storage, Capability<I> capability, boolean save) {
