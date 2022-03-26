@@ -3,7 +3,7 @@ package dev._100media.capabilitysyncer.core;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.PacketDistributor;
 
-public abstract class EntityCapability implements ISyncableEntityCapability {
+public abstract class EntityCapability implements ISyncableCapability {
     protected final Entity entity;
 
     protected EntityCapability(Entity entity) {
@@ -14,6 +14,6 @@ public abstract class EntityCapability implements ISyncableEntityCapability {
     public void updateTracking() {
         if (this.entity.level.isClientSide)
             return;
-        getNetworkChannel().send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> this.entity), this.createUpdatePacket());
+        getNetworkChannel().send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> this.entity), this.createUpdatePacket(0));
     }
 }

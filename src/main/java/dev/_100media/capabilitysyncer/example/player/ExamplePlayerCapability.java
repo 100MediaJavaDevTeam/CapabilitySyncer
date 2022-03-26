@@ -1,7 +1,7 @@
 package dev._100media.capabilitysyncer.example.player;
 
 import dev._100media.capabilitysyncer.core.PlayerCapability;
-import dev._100media.capabilitysyncer.network.EntityCapabilityStatusPacket;
+import dev._100media.capabilitysyncer.network.CapabilityStatusPacket;
 import dev._100media.capabilitysyncer.network.SimpleEntityCapabilityStatusPacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -46,7 +46,7 @@ public class ExamplePlayerCapability extends PlayerCapability {
     }
 
     @Override
-    public EntityCapabilityStatusPacket createUpdatePacket() {
+    public CapabilityStatusPacket createUpdatePacket(int id) {
         // Make sure to register this update packet to your network channel!
         return new SimpleEntityCapabilityStatusPacket(player.getId(), ExamplePlayerCapabilityAttacher.EXAMPLE_PLAYER_CAPABILITY_RL, this);
     }

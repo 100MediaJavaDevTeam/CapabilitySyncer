@@ -1,15 +1,22 @@
 package dev._100media.capabilitysyncer.network;
 
-import dev._100media.capabilitysyncer.core.ISyncableEntityCapability;
+import dev._100media.capabilitysyncer.core.ISyncableCapability;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 
 import java.util.function.Function;
 
 class ClientPacketHandler {
-    static <T extends Entity> void handleCapabilityStatus(EntityCapabilityStatusPacket packet, Function<T, ISyncableEntityCapability> capabilityRetriever) {
-        ISyncableEntityCapability capability = capabilityRetriever.apply(getEntity(packet.getEntityId()));
+    static <T extends Entity> void handleEntityCapabilityStatus(CapabilityStatusPacket packet, Function<T, ISyncableCapability> capabilityRetriever) {
+        ISyncableCapability capability = capabilityRetriever.apply(getEntity(packet.getEntityId()));
+        if (capability != null)
+            capability.deserializeNBT(packet.getTag(), false);
+    }
+
+    static void handleLevelCapabilityStatus(CapabilityStatusPacket packet, Function<Level, ISyncableCapability> capabilityRetriever) {
+        ISyncableCapability capability = capabilityRetriever.apply(Minecraft.getInstance().level);
         if (capability != null)
             capability.deserializeNBT(packet.getTag(), false);
     }
