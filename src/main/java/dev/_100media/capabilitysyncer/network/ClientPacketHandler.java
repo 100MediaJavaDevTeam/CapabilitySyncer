@@ -9,13 +9,13 @@ import net.minecraft.world.level.Level;
 import java.util.function.Function;
 
 class ClientPacketHandler {
-    static <T extends Entity> void handleEntityCapabilityStatus(CapabilityStatusPacket packet, Function<T, ISyncableCapability> capabilityRetriever) {
+    static <T extends Entity> void handleEntityCapabilityStatus(EntityCapabilityStatusPacket packet, Function<T, ISyncableCapability> capabilityRetriever) {
         ISyncableCapability capability = capabilityRetriever.apply(getEntity(packet.getEntityId()));
         if (capability != null)
             capability.deserializeNBT(packet.getTag(), false);
     }
 
-    static void handleLevelCapabilityStatus(CapabilityStatusPacket packet, Function<Level, ISyncableCapability> capabilityRetriever) {
+    static void handleLevelCapabilityStatus(LevelCapabilityStatusPacket packet, Function<Level, ISyncableCapability> capabilityRetriever) {
         ISyncableCapability capability = capabilityRetriever.apply(Minecraft.getInstance().level);
         if (capability != null)
             capability.deserializeNBT(packet.getTag(), false);

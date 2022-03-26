@@ -9,7 +9,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.*;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.CapabilityToken;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.capabilities.ICapabilitySerializable;
+import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
@@ -18,16 +23,25 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public abstract class CapabilityAttacher {
-    private static final List<Function<Entity, LazyOptional<? extends ISyncableCapability>>> entityCapRetrievers = new ArrayList<>();
+    static {
+        MinecraftForge.EVENT_BUS.addGenericListener(Entity.class, CapabilityAttacher::onAttachEntityCapability);
+        MinecraftForge.EVENT_BUS.addGenericListener(ItemStack.class, CapabilityAttacher::onAttachItemStackCapability);
+        MinecraftForge.EVENT_BUS.addGenericListener(Level.class, CapabilityAttacher::onAttachLevelCapability);
+        MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onEntityJoinWorld);
+        MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onPlayerStartTracking);
+        MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onPlayerClone);
+
+        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modBus.addListener(CapabilityAttacher::onRegisterCapabilities);
+    }
 
     private static final List<Class<?>> capClasses = new ArrayList<>();
 
@@ -41,29 +55,18 @@ public abstract class CapabilityAttacher {
     }
 
     private static final List<BiConsumer<AttachCapabilitiesEvent<Entity>, Entity>> entityCapAttachers = new ArrayList<>();
+    private static final List<Function<Entity, LazyOptional<? extends ISyncableCapability>>> entityCapRetrievers = new ArrayList<>();
+
     private static final List<BiConsumer<AttachCapabilitiesEvent<Level>, Level>> levelCapAttachers = new ArrayList<>();
     private static final List<Function<Level, LazyOptional<? extends ISyncableCapability>>> levelCapRetrievers = new ArrayList<>();
-
-    static {
-        MinecraftForge.EVENT_BUS.addGenericListener(Entity.class, CapabilityAttacher::onAttachEntityCapability);
-        MinecraftForge.EVENT_BUS.addGenericListener(ItemStack.class, CapabilityAttacher::onAttachItemStackCapability);
-        MinecraftForge.EVENT_BUS.addGenericListener(Level.class, CapabilityAttacher::onAttachLevelCapability);
-        MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onEntityJoinWorld);
-        MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onPlayerStartTracking);
-        MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onPlayerClone);
-
-        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modBus.addListener(CapabilityAttacher::onRegisterCapabilities);
-    }
 
     private static final List<BiConsumer<AttachCapabilitiesEvent<ItemStack>, ItemStack>> itemStackCapAttachers = new ArrayList<>();
     private static final List<Function<ItemStack, LazyOptional<? extends ItemStackCapability>>> itemStackCapRetrievers = new ArrayList<>();
 
-
     private static final List<BiConsumer<Player, Player>> playerCapCloners = new ArrayList<>();
 
     protected static <C extends ISyncableCapability> void registerPlayerAttacher(BiConsumer<AttachCapabilitiesEvent<Entity>, Player> attacher,
-                                                                                 Function<Player, LazyOptional<C>> capRetriever, boolean copyOnDeath) {
+            Function<Player, LazyOptional<C>> capRetriever, boolean copyOnDeath) {
         registerEntityAttacher(Player.class, attacher, capRetriever);
         if (copyOnDeath) {
             playerCapCloners.add((oldPlayer, newPlayer) -> capRetriever.apply(oldPlayer).ifPresent(oldCap -> capRetriever.apply(newPlayer)
@@ -73,7 +76,7 @@ public abstract class CapabilityAttacher {
 
     @SuppressWarnings("unchecked")
     protected static <E extends Entity, C extends ISyncableCapability> void registerEntityAttacher(Class<E> entityClass, BiConsumer<AttachCapabilitiesEvent<Entity>, E> attacher,
-                                                                                                   Function<E, LazyOptional<C>> capRetriever) {
+            Function<E, LazyOptional<C>> capRetriever) {
         entityCapAttachers.add((event, entity) -> {
             if (entityClass.isInstance(entity))
                 attacher.accept(event, (E) entity);
@@ -81,9 +84,14 @@ public abstract class CapabilityAttacher {
         entityCapRetrievers.add(entity -> entityClass.isInstance(entity) ? capRetriever.apply((E) entity) : LazyOptional.empty());
     }
 
+    protected static <C extends ISyncableCapability> void registerLevelAttacher(BiConsumer<AttachCapabilitiesEvent<Level>, Level> attacher,
+            Function<Level, LazyOptional<C>> capRetriever) {
+        registerLevelAttacher(Level.class, attacher, capRetriever);
+    }
+
     @SuppressWarnings("unchecked")
     protected static <E extends Level, C extends ISyncableCapability> void registerLevelAttacher(Class<E> levelClass, BiConsumer<AttachCapabilitiesEvent<Level>, E> attacher,
-                                                                                                 Function<E, LazyOptional<C>> capRetriever) {
+            Function<E, LazyOptional<C>> capRetriever) {
         levelCapAttachers.add((event, level) -> {
             if (levelClass.isInstance(level))
                 attacher.accept(event, (E) level);
@@ -92,7 +100,7 @@ public abstract class CapabilityAttacher {
     }
 
     protected static <C extends ItemStackCapability> void registerItemStackAttacher(BiConsumer<AttachCapabilitiesEvent<ItemStack>, ItemStack> attacher,
-                                                                                    Function<ItemStack, LazyOptional<C>> capRetriever) {
+            Function<ItemStack, LazyOptional<C>> capRetriever) {
         itemStackCapAttachers.add(attacher);
         itemStackCapRetrievers.add(capRetriever::apply);
     }
@@ -115,9 +123,9 @@ public abstract class CapabilityAttacher {
         if (capability == null)
             throw new NullPointerException();
         return save ? new ICapabilitySerializable<T>() {
-            @Nonnull
+            @NotNull
             @Override
-            public <C> LazyOptional<C> getCapability(@Nonnull Capability<C> cap, @Nullable Direction side) {
+            public <C> LazyOptional<C> getCapability(@NotNull Capability<C> cap, @Nullable Direction side) {
                 return cap == capability ? storage.cast() : LazyOptional.empty();
             }
 
@@ -137,9 +145,9 @@ public abstract class CapabilityAttacher {
                 }
             }
         } : new ICapabilityProvider() {
-            @Nonnull
+            @NotNull
             @Override
-            public <C> LazyOptional<C> getCapability(@Nonnull Capability<C> cap, @Nullable Direction side) {
+            public <C> LazyOptional<C> getCapability(@NotNull Capability<C> cap, @Nullable Direction side) {
                 return cap == capability ? storage.cast() : LazyOptional.empty();
             }
         };
@@ -169,6 +177,8 @@ public abstract class CapabilityAttacher {
         if (event.getEntity() instanceof ServerPlayer player) {
             // Syncs a player's capabilities to themselves on world join (either joining server or switching worlds)
             entityCapRetrievers.forEach(capRetriever -> capRetriever.apply(player).ifPresent(cap -> cap.sendUpdatePacketToPlayer(player)));
+
+            // Sync level capabilities to a player when they join that level
             levelCapRetrievers.forEach(capRetriever -> capRetriever.apply(player.level).ifPresent(cap -> cap.sendUpdatePacketToPlayer(player)));
         }
     }

@@ -8,8 +8,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class ExamplePlayerCapabilityAttacher extends CapabilityAttacher {
     private static final Class<ExamplePlayerCapability> CAPABILITY_CLASS = ExamplePlayerCapability.class;

@@ -9,20 +9,20 @@ import net.minecraftforge.network.simple.SimpleChannel;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public abstract class CapabilityStatusPacket implements IPacket {
+public abstract class EntityCapabilityStatusPacket implements IPacket {
     private final int entityId;
     private final CompoundTag tag;
 
-    protected CapabilityStatusPacket(int entityId, CompoundTag tag) {
+    protected EntityCapabilityStatusPacket(int entityId, CompoundTag tag) {
         this.entityId = entityId;
         this.tag = tag;
     }
 
-    protected CapabilityStatusPacket(int entityId, ISyncableCapability capability) {
+    protected EntityCapabilityStatusPacket(int entityId, ISyncableCapability capability) {
         this(entityId, capability.serializeNBT(false));
     }
 
-    protected static <T extends CapabilityStatusPacket> void register(SimpleChannel channel, int id, Class<T> packetClass, Function<FriendlyByteBuf, T> readFunc) {
+    protected static <T extends EntityCapabilityStatusPacket> void register(SimpleChannel channel, int id, Class<T> packetClass, Function<FriendlyByteBuf, T> readFunc) {
         IPacket.register(channel, id, NetworkDirection.PLAY_TO_CLIENT, packetClass, readFunc);
     }
 
@@ -31,7 +31,7 @@ public abstract class CapabilityStatusPacket implements IPacket {
         buf.writeNbt(tag);
     }
 
-    protected static <T extends CapabilityStatusPacket> T read(FriendlyByteBuf buf, BiFunction<Integer, CompoundTag, T> function) {
+    protected static <T extends EntityCapabilityStatusPacket> T read(FriendlyByteBuf buf, BiFunction<Integer, CompoundTag, T> function) {
         return function.apply(buf.readInt(), buf.readNbt());
     }
 

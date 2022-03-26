@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public class SimpleEntityCapabilityStatusPacket extends CapabilityStatusPacket {
+public class SimpleEntityCapabilityStatusPacket extends EntityCapabilityStatusPacket {
     private static final Map<ResourceLocation, Function<Entity, ISyncableCapability>> capRetrievers = new HashMap<>();
     private final ResourceLocation capabilityId;
 

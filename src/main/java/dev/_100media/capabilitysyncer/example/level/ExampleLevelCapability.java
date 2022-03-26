@@ -1,18 +1,18 @@
-package dev._100media.capabilitysyncer.example.player;
+package dev._100media.capabilitysyncer.example.level;
 
-import dev._100media.capabilitysyncer.core.PlayerCapability;
-import dev._100media.capabilitysyncer.network.EntityCapabilityStatusPacket;
-import dev._100media.capabilitysyncer.network.SimpleEntityCapabilityStatusPacket;
+import dev._100media.capabilitysyncer.core.LevelCapability;
+import dev._100media.capabilitysyncer.network.LevelCapabilityStatusPacket;
+import dev._100media.capabilitysyncer.network.SimpleLevelCapabilityStatusPacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.network.simple.SimpleChannel;
 
-public class ExamplePlayerCapability extends PlayerCapability {
+public class ExampleLevelCapability extends LevelCapability {
     private int exampleInt = 5;
 
-    public ExamplePlayerCapability(Player player) {
-        super(player);
+    public ExampleLevelCapability(Level level) {
+        super(level);
     }
 
     public int getExampleInt() {
@@ -22,7 +22,7 @@ public class ExamplePlayerCapability extends PlayerCapability {
     public void setExampleInt(int exampleInt, boolean sync) {
         this.exampleInt = exampleInt;
         if (sync) {
-            // Send an update packet to all tracking clients
+            // Send an update packet to all clients in this dimension
             this.updateTracking();
         }
     }
@@ -46,9 +46,9 @@ public class ExamplePlayerCapability extends PlayerCapability {
     }
 
     @Override
-    public EntityCapabilityStatusPacket createUpdatePacket() {
+    public LevelCapabilityStatusPacket createUpdatePacket() {
         // Make sure to register this update packet to your network channel!
-        return new SimpleEntityCapabilityStatusPacket(player.getId(), ExamplePlayerCapabilityAttacher.EXAMPLE_PLAYER_CAPABILITY_RL, this);
+        return new SimpleLevelCapabilityStatusPacket(ExampleLevelCapabilityAttacher.EXAMPLE_LEVEL_CAPABILITY_RL, this);
     }
 
     @Override
