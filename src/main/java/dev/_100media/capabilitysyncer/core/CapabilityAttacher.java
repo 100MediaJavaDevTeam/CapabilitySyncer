@@ -193,8 +193,8 @@ public abstract class CapabilityAttacher {
         Player oldPlayer = event.getOriginal();
         Player newPlayer = event.getPlayer();
 
-        // So we can copy capabilities
-        oldPlayer.revive();
+        // Revive the old player's capabilities; so we can copy them over to the new player
+        oldPlayer.reviveCaps();
 
         playerCapCloners.forEach(capCloner -> capCloner.accept(oldPlayer, newPlayer));
     }
