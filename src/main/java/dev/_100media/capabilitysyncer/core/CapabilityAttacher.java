@@ -169,7 +169,7 @@ public abstract class CapabilityAttacher {
     }
 
     private static void onAttachLevelCapability(AttachCapabilitiesEvent<Level> event) {
-        // Attaches the item stack capabilities
+        // Attaches the level capabilities
         levelCapAttachers.forEach(attacher -> attacher.accept(event, event.getObject()));
     }
 
