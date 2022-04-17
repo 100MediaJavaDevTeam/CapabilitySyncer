@@ -67,21 +67,31 @@ public abstract class CapabilityAttacher {
 
     protected static <C extends ISyncableCapability> void registerPlayerAttacher(BiConsumer<AttachCapabilitiesEvent<Entity>, Player> attacher,
             Function<Player, LazyOptional<C>> capRetriever, boolean copyOnDeath) {
-        registerEntityAttacher(Player.class, attacher, capRetriever);
-        if (copyOnDeath) {
-            playerCapCloners.add((oldPlayer, newPlayer) -> capRetriever.apply(oldPlayer).ifPresent(oldCap -> capRetriever.apply(newPlayer)
-                    .ifPresent(newCap -> newCap.deserializeNBT(oldCap.serializeNBT(false), false))));
-        }
+        registerEntityAttacher(Player.class, attacher, capRetriever, copyOnDeath);
+    }
+
+    protected static <E extends Entity, C extends ISyncableCapability> void registerEntityAttacher(Class<E> entityClass, BiConsumer<AttachCapabilitiesEvent<Entity>, E> attacher,
+        Function<E, LazyOptional<C>> capRetriever) {
+        registerEntityAttacher(entityClass, attacher, capRetriever, false);
     }
 
     @SuppressWarnings("unchecked")
     protected static <E extends Entity, C extends ISyncableCapability> void registerEntityAttacher(Class<E> entityClass, BiConsumer<AttachCapabilitiesEvent<Entity>, E> attacher,
-            Function<E, LazyOptional<C>> capRetriever) {
+            Function<E, LazyOptional<C>> capRetriever, boolean copyOnDeath) {
         entityCapAttachers.add((event, entity) -> {
             if (entityClass.isInstance(entity))
                 attacher.accept(event, (E) entity);
         });
         entityCapRetrievers.add(entity -> entityClass.isInstance(entity) ? capRetriever.apply((E) entity) : LazyOptional.empty());
+        if (copyOnDeath) {
+            playerCapCloners.add((oldPlayer, newPlayer) -> {
+                if (entityClass.isInstance(newPlayer) && entityClass.isInstance(oldPlayer)) {
+                    capRetriever.apply((E) oldPlayer)
+                            .ifPresent(oldCap -> capRetriever.apply((E) newPlayer)
+                                    .ifPresent(newCap -> newCap.deserializeNBT(oldCap.serializeNBT(false), false)));
+                }
+            });
+        }
     }
 
     protected static <C extends ISyncableCapability> void registerLevelAttacher(BiConsumer<AttachCapabilitiesEvent<Level>, Level> attacher,

@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 public class ExampleItemStackCapabilityAttacher extends CapabilityAttacher {
     private static final Class<ExampleItemStackCapability> CAPABILITY_CLASS = ExampleItemStackCapability.class;
     public static final Capability<ExampleItemStackCapability> EXAMPLE_ITEM_STACK_CAPABILITY = getCapability(new CapabilityToken<>() {});
-    public static final ResourceLocation EXAMPLE_PLAYER_CAPABILITY_RL = new ResourceLocation("example", "example_item_stack_capability");
+    public static final ResourceLocation EXAMPLE_ITEM_STACK_CAPABILITY_RL = new ResourceLocation("example", "example_item_stack_capability");
 
     @Nullable
     public static ExampleItemStackCapability getExampleItemStackCapabilityUnwrap(ItemStack itemStack) {
@@ -24,7 +24,7 @@ public class ExampleItemStackCapabilityAttacher extends CapabilityAttacher {
     }
 
     private static void attach(AttachCapabilitiesEvent<ItemStack> event, ItemStack itemStack) {
-        genericAttachCapability(event, new ExampleItemStackCapability(itemStack), EXAMPLE_ITEM_STACK_CAPABILITY, EXAMPLE_PLAYER_CAPABILITY_RL);
+        genericAttachCapability(event, new ExampleItemStackCapability(itemStack), EXAMPLE_ITEM_STACK_CAPABILITY, EXAMPLE_ITEM_STACK_CAPABILITY_RL);
     }
 
     public static void register() {
