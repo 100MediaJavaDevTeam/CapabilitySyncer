@@ -3,7 +3,7 @@ package dev._100media.capabilitysyncer.core;
 import net.minecraft.entity.Entity;
 import net.minecraftforge.fml.network.PacketDistributor;
 
-public abstract class EntityCapability implements ISyncableEntityCapability {
+public abstract class EntityCapability implements ISyncableCapability {
     protected final Entity entity;
 
     protected EntityCapability(Entity entity) {

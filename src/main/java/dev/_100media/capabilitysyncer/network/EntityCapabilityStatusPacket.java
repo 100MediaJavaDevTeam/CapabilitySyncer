@@ -1,6 +1,6 @@
 package dev._100media.capabilitysyncer.network;
 
-import dev._100media.capabilitysyncer.core.ISyncableEntityCapability;
+import dev._100media.capabilitysyncer.core.ISyncableCapability;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkDirection;
@@ -18,7 +18,7 @@ public abstract class EntityCapabilityStatusPacket implements IPacket {
         this.tag = tag;
     }
 
-    protected EntityCapabilityStatusPacket(int entityId, ISyncableEntityCapability capability) {
+    protected EntityCapabilityStatusPacket(int entityId, ISyncableCapability capability) {
         this(entityId, capability.serializeNBT(false));
     }
 
