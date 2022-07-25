@@ -18,7 +18,7 @@ import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -35,7 +35,7 @@ public abstract class CapabilityAttacher {
         MinecraftForge.EVENT_BUS.addGenericListener(Entity.class, CapabilityAttacher::onAttachEntityCapability);
         MinecraftForge.EVENT_BUS.addGenericListener(ItemStack.class, CapabilityAttacher::onAttachItemStackCapability);
         MinecraftForge.EVENT_BUS.addGenericListener(Level.class, CapabilityAttacher::onAttachLevelCapability);
-        MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onEntityJoinWorld);
+        MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onEntityJoinLevel);
         MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onPlayerStartTracking);
         MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onPlayerClone);
 
@@ -183,7 +183,7 @@ public abstract class CapabilityAttacher {
         levelCapAttachers.forEach(attacher -> attacher.accept(event, event.getObject()));
     }
 
-    private static void onEntityJoinWorld(EntityJoinWorldEvent event) {
+    private static void onEntityJoinLevel(EntityJoinLevelEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             // Syncs a player's capabilities to themselves on world join (either joining server or switching worlds)
             entityCapRetrievers.forEach(capRetriever -> capRetriever.apply(player).ifPresent(cap -> cap.sendUpdatePacketToPlayer(player)));
@@ -195,13 +195,13 @@ public abstract class CapabilityAttacher {
 
     private static void onPlayerStartTracking(PlayerEvent.StartTracking event) {
         // Syncs an entity's capabilities to a player when they start tracking it
-        ServerPlayer currentPlayer = (ServerPlayer) event.getPlayer();
+        ServerPlayer currentPlayer = (ServerPlayer) event.getEntity();
         entityCapRetrievers.forEach(capRetriever -> capRetriever.apply(event.getTarget()).ifPresent(cap -> cap.sendUpdatePacketToPlayer(currentPlayer)));
     }
 
     private static void onPlayerClone(PlayerEvent.Clone event) {
         Player oldPlayer = event.getOriginal();
-        Player newPlayer = event.getPlayer();
+        Player newPlayer = event.getEntity();
 
         // Revive the old player's capabilities; so we can copy them over to the new player
         oldPlayer.reviveCaps();
