@@ -21,6 +21,9 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,7 +42,19 @@ public abstract class CapabilityAttacher {
         MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onPlayerStartTracking);
         MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onPlayerClone);
 
-        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+        FMLJavaModLoadingContext modLoadingContext = FMLJavaModLoadingContext.get();
+        IEventBus modBus;
+        if (modLoadingContext == null) {
+            ModContainer prevContainer = ModLoadingContext.get().getActiveContainer();
+            // This will set it to "forge", which should always exist
+            ModLoadingContext.get().setActiveContainer(ModList.get().getModContainerById("forge").orElseThrow(() -> new IllegalStateException("Forge is not loaded")));
+            // Should no longer be null here
+            modBus = FMLJavaModLoadingContext.get().getModEventBus();
+            // Set back to previous container
+            ModLoadingContext.get().setActiveContainer(prevContainer);
+        } else {
+            modBus = modLoadingContext.getModEventBus();
+        }
         modBus.addListener(CapabilityAttacher::onRegisterCapabilities);
     }
 
