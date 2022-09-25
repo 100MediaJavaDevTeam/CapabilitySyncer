@@ -27,8 +27,8 @@ public abstract class EntityCapabilityStatusPacket implements IPacket {
     }
 
     public void write(FriendlyByteBuf buf) {
-        buf.writeInt(entityId);
-        buf.writeNbt(tag);
+        buf.writeInt(this.entityId);
+        buf.writeNbt(this.tag);
     }
 
     protected static <T extends EntityCapabilityStatusPacket> T read(FriendlyByteBuf buf, BiFunction<Integer, CompoundTag, T> function) {

@@ -1,14 +1,11 @@
 package dev._100media.capabilitysyncer.example.livingentity;
 
 import dev._100media.capabilitysyncer.core.LivingEntityCapability;
-import dev._100media.capabilitysyncer.core.PlayerCapability;
-import dev._100media.capabilitysyncer.example.player.ExamplePlayerCapabilityAttacher;
 import dev._100media.capabilitysyncer.network.EntityCapabilityStatusPacket;
 import dev._100media.capabilitysyncer.network.SimpleEntityCapabilityStatusPacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public class ExampleLivingEntityCapability extends LivingEntityCapability {

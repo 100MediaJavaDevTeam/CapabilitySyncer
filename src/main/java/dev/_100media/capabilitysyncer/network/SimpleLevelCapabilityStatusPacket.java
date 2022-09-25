@@ -26,20 +26,32 @@ public class SimpleLevelCapabilityStatusPacket extends LevelCapabilityStatusPack
         this.capabilityId = capabilityId;
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * @deprecated Use {@link #register(SimpleChannel, int)} once for the network channel and {@link #registerRetriever(ResourceLocation, Function)} for each capability.
+     */
+    @Deprecated(since = "3.0.2", forRemoval = true)
     public static <T extends Level> void register(ResourceLocation capabilityId, Function<T, ISyncableCapability> capabilityRetriever, SimpleChannel channel, int id) {
-        capRetrievers.put(capabilityId, (Function<Level, ISyncableCapability>) capabilityRetriever);
+        registerRetriever(capabilityId, capabilityRetriever);
+        register(channel, id);
+    }
+
+    public static void register(SimpleChannel channel, int id) {
         register(channel, id, SimpleLevelCapabilityStatusPacket.class, buf -> read(buf, tag -> new SimpleLevelCapabilityStatusPacket(buf.readResourceLocation(), tag)));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Level> void registerRetriever(ResourceLocation capabilityId, Function<T, ISyncableCapability> capabilityRetriever) {
+        capRetrievers.put(capabilityId, (Function<Level, ISyncableCapability>) capabilityRetriever);
     }
 
     @Override
     public void write(FriendlyByteBuf buf) {
         super.write(buf);
-        buf.writeResourceLocation(capabilityId);
+        buf.writeResourceLocation(this.capabilityId);
     }
 
     @Override
     public void handle(NetworkEvent.Context context) {
-        context.enqueueWork(() -> ClientPacketHandler.handleLevelCapabilityStatus(this, capRetrievers.get(capabilityId)));
+        context.enqueueWork(() -> ClientPacketHandler.handleLevelCapabilityStatus(this, capRetrievers.get(this.capabilityId)));
     }
 }

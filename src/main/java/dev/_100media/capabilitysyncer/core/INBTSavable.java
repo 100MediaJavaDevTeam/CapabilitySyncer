@@ -16,7 +16,7 @@ public interface INBTSavable<T extends Tag> extends INBTSerializable<T> {
     T serializeNBT(boolean savingToDisk);
 
     /**
-     * @deprecated Use {@link #deserializeNBT(INBT, boolean)}
+     * @deprecated Use {@link #deserializeNBT(Tag, boolean)}
      */
     @Deprecated
     @Override

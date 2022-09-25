@@ -24,7 +24,7 @@ public abstract class LevelCapabilityStatusPacket implements IPacket {
     }
 
     public void write(FriendlyByteBuf buf) {
-        buf.writeNbt(tag);
+        buf.writeNbt(this.tag);
     }
 
     protected static <T extends LevelCapabilityStatusPacket> T read(FriendlyByteBuf buf, Function<CompoundTag, T> function) {

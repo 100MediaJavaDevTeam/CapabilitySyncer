@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class SimpleEntityCapabilityStatusPacket extends EntityCapabilityStatusPacket {
-    private static final Map<ResourceLocation, Function<Entity, ISyncableCapability>> capRetrievers = new HashMap<>();
+    private static final Map<ResourceLocation, Function<? extends Entity, ISyncableCapability>> capRetrievers = new HashMap<>();
     private final ResourceLocation capabilityId;
 
     public SimpleEntityCapabilityStatusPacket(int entityId, ResourceLocation capabilityId, CompoundTag tag) {
@@ -29,17 +29,28 @@ public class SimpleEntityCapabilityStatusPacket extends EntityCapabilityStatusPa
     @Override
     public void write(FriendlyByteBuf buf) {
         super.write(buf);
-        buf.writeResourceLocation(capabilityId);
+        buf.writeResourceLocation(this.capabilityId);
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * @deprecated Use {@link #register(SimpleChannel, int)} once for the network channel and {@link #registerRetriever(ResourceLocation, Function)} for each capability.
+     */
+    @Deprecated(since = "3.0.2", forRemoval = true)
     public static <T extends Entity> void register(ResourceLocation capabilityId, Function<T, ISyncableCapability> capabilityRetriever, SimpleChannel channel, int id) {
-        capRetrievers.put(capabilityId, (Function<Entity, ISyncableCapability>) capabilityRetriever);
+        registerRetriever(capabilityId, capabilityRetriever);
+        register(channel, id);
+    }
+
+    public static void register(SimpleChannel channel, int id) {
         register(channel, id, SimpleEntityCapabilityStatusPacket.class, buf -> read(buf, (entityId, tag) -> new SimpleEntityCapabilityStatusPacket(entityId, buf.readResourceLocation(), tag)));
+    }
+
+    public static <T extends Entity> void registerRetriever(ResourceLocation capabilityId, Function<T, ISyncableCapability> capabilityRetriever) {
+        capRetrievers.put(capabilityId, capabilityRetriever);
     }
 
     @Override
     public void handle(NetworkEvent.Context context) {
-        context.enqueueWork(() -> ClientPacketHandler.handleEntityCapabilityStatus(this, capRetrievers.get(capabilityId)));
+        context.enqueueWork(() -> ClientPacketHandler.handleEntityCapabilityStatus(this, capRetrievers.get(this.capabilityId)));
     }
 }
