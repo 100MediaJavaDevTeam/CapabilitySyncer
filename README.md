@@ -52,9 +52,7 @@ shadowJar {
     finalizedBy 'reobfShadowJar'
 }
 
-artifacts {
-    shadowJar
-}
+assemble.dependsOn shadowJar
 
 reobf {
     shadowJar {}

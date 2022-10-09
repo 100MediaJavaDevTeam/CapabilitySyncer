@@ -1,24 +1,15 @@
-buildscript {
-    repositories {
-        // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
-        maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://maven.parchmentmc.org' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.parchmentmc:librarian:1.+'
-    }
+plugins {
+    id 'eclipse'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'dev._100media.gradleutils' version '1.+'
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.parchmentmc.librarian.forgegradle'
-// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
 
 version = "${minecraft_version}-${mod_version}"
 group = mod_base_package // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = mod_id
+hundredMedia.mcVersion = minecraft_version
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -227,16 +218,6 @@ publishing {
         }
     }
     repositories {
-        maven {
-            name = '100Media'
-            url = 'https://maven.100media.dev/' + (project.version.endsWith('-SNAPSHOT') ? 'public-snapshots' : 'public-releases')
-            credentials {
-                username = project.getProperty('hm_maven_username')
-                password = project.getProperty('hm_maven_password')
-            }
-            authentication {
-                basic(BasicAuthentication)
-            }
-        }
+        maven hundredMedia.getPublishing100MediaMaven()
     }
 }
