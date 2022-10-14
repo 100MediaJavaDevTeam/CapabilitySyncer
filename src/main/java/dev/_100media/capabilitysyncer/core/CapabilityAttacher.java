@@ -3,6 +3,7 @@ package dev._100media.capabilitysyncer.core;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -122,6 +123,27 @@ public abstract class CapabilityAttacher {
                 attacher.accept(event, (E) level);
         });
         levelCapRetrievers.add(level -> levelClass.isInstance(level) ? capRetriever.apply((E) level) : LazyOptional.empty());
+    }
+
+    /**
+     * Registers a global level capability attacher.
+     * A global level capability is attached to the overworld level on the server and the client level on the client.
+     * Querying a global level capability from a different server level will return the one attached to the overworld.
+     */
+    protected static <C extends GlobalLevelCapability> void registerGlobalLevelAttacher(BiConsumer<AttachCapabilitiesEvent<Level>, Level> attacher,
+            Function<Level, LazyOptional<C>> capRetriever) {
+        levelCapAttachers.add((event, level) -> {
+            if (level.isClientSide || level.dimension() == Level.OVERWORLD)
+                attacher.accept(event, level);
+        });
+        levelCapRetrievers.add(level -> {
+            if (level.isClientSide)
+                return capRetriever.apply(level);
+
+            MinecraftServer server = level.getServer();
+
+            return server == null ? LazyOptional.empty() : capRetriever.apply(server.overworld());
+        });
     }
 
     protected static <C extends ItemStackCapability> void registerItemStackAttacher(BiConsumer<AttachCapabilitiesEvent<ItemStack>, ItemStack> attacher,

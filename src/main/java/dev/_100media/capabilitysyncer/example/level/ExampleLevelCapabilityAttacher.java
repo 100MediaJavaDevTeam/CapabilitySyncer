@@ -14,6 +14,7 @@ public class ExampleLevelCapabilityAttacher extends CapabilityAttacher {
     public static final Capability<ExampleLevelCapability> EXAMPLE_LEVEL_CAPABILITY = getCapability(new CapabilityToken<>() {});
     public static final ResourceLocation EXAMPLE_LEVEL_CAPABILITY_RL = new ResourceLocation("example", "example_level_capability");
 
+    @SuppressWarnings("ConstantConditions")
     @Nullable
     public static ExampleLevelCapability getExampleLevelCapabilityUnwrap(Level level) {
         return getExampleLevelCapability(level).orElse(null);

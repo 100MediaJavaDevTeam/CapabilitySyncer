@@ -16,6 +16,7 @@ public class ExampleLivingEntityCapabilityAttacher extends CapabilityAttacher {
     public static final Capability<LivingEntityCapability> EXAMPLE_LIVING_ENTITY_CAPABILITY = getCapability(new CapabilityToken<>() {});
     public static final ResourceLocation EXAMPLE_LIVING_ENTITY_CAPABILITY_RL = new ResourceLocation("example", "example_living_entity_capability");
 
+    @SuppressWarnings("ConstantConditions")
     @Nullable
     public static LivingEntityCapability getExampleLivingEntityCapabilityUnwrap(LivingEntity entity) {
         return getExampleLivingEntityCapability(entity).orElse(null);

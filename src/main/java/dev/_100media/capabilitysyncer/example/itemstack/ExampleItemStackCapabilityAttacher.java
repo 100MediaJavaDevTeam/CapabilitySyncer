@@ -14,6 +14,7 @@ public class ExampleItemStackCapabilityAttacher extends CapabilityAttacher {
     public static final Capability<ExampleItemStackCapability> EXAMPLE_ITEM_STACK_CAPABILITY = getCapability(new CapabilityToken<>() {});
     public static final ResourceLocation EXAMPLE_ITEM_STACK_CAPABILITY_RL = new ResourceLocation("example", "example_item_stack_capability");
 
+    @SuppressWarnings("ConstantConditions")
     @Nullable
     public static ExampleItemStackCapability getExampleItemStackCapabilityUnwrap(ItemStack itemStack) {
         return getExampleItemStackCapability(itemStack).orElse(null);

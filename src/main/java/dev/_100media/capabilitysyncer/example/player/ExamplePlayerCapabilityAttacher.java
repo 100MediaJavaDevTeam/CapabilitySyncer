@@ -15,6 +15,7 @@ public class ExamplePlayerCapabilityAttacher extends CapabilityAttacher {
     public static final Capability<ExamplePlayerCapability> EXAMPLE_PLAYER_CAPABILITY = getCapability(new CapabilityToken<>() {});
     public static final ResourceLocation EXAMPLE_PLAYER_CAPABILITY_RL = new ResourceLocation("example", "example_player_capability");
 
+    @SuppressWarnings("ConstantConditions")
     @Nullable
     public static ExamplePlayerCapability getExamplePlayerCapabilityUnwrap(Player player) {
         return getExamplePlayerCapability(player).orElse(null);
