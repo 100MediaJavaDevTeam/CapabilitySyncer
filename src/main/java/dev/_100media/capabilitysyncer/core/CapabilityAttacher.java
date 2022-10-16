@@ -70,6 +70,17 @@ public abstract class CapabilityAttacher {
         capClasses.add(capClass);
     }
 
+    protected static <T extends GlobalLevelCapability> LazyOptional<T> getGlobalLevelCapability(Level level, Capability<T> capability) {
+        if (level.isClientSide || level.dimension() == Level.OVERWORLD)
+            return level.getCapability(capability);
+
+        MinecraftServer server = level.getServer();
+        if (server == null)
+            return LazyOptional.empty();
+
+        return server.overworld().getCapability(capability);
+    }
+
     private static final List<BiConsumer<AttachCapabilitiesEvent<Entity>, Entity>> entityCapAttachers = new ArrayList<>();
     private static final List<Function<Entity, LazyOptional<? extends ISyncableCapability>>> entityCapRetrievers = new ArrayList<>();
 
@@ -79,7 +90,7 @@ public abstract class CapabilityAttacher {
     private static final List<BiConsumer<AttachCapabilitiesEvent<ItemStack>, ItemStack>> itemStackCapAttachers = new ArrayList<>();
     private static final List<Function<ItemStack, LazyOptional<? extends ItemStackCapability>>> itemStackCapRetrievers = new ArrayList<>();
 
-    private static final List<BiConsumer<Player, Player>> playerCapCloners = new ArrayList<>();
+    private static final List<CloneConsumer> playerCapCloners = new ArrayList<>();
 
     protected static <C extends ISyncableCapability> void registerPlayerAttacher(BiConsumer<AttachCapabilitiesEvent<Entity>, Player> attacher,
             Function<Player, LazyOptional<C>> capRetriever, boolean copyOnDeath) {
@@ -99,12 +110,12 @@ public abstract class CapabilityAttacher {
                 attacher.accept(event, (E) entity);
         });
         entityCapRetrievers.add(entity -> entityClass.isInstance(entity) ? capRetriever.apply((E) entity) : LazyOptional.empty());
-        if (copyOnDeath) {
-            playerCapCloners.add((oldPlayer, newPlayer) -> {
-                if (entityClass.isInstance(newPlayer) && entityClass.isInstance(oldPlayer)) {
+        if (entityClass.isAssignableFrom(Player.class) || Player.class.isAssignableFrom(entityClass)) {
+            playerCapCloners.add((oldPlayer, newPlayer, wasDeath) -> {
+                if ((copyOnDeath || !wasDeath) && entityClass.isInstance(newPlayer) && entityClass.isInstance(oldPlayer)) {
                     capRetriever.apply((E) oldPlayer)
                             .ifPresent(oldCap -> capRetriever.apply((E) newPlayer)
-                                    .ifPresent(newCap -> newCap.deserializeNBT(oldCap.serializeNBT(false), false)));
+                                    .ifPresent(newCap -> newCap.copyFrom(oldCap, wasDeath)));
                 }
             });
         }
@@ -243,6 +254,10 @@ public abstract class CapabilityAttacher {
         // Revive the old player's capabilities; so we can copy them over to the new player
         oldPlayer.reviveCaps();
 
-        playerCapCloners.forEach(capCloner -> capCloner.accept(oldPlayer, newPlayer));
+        playerCapCloners.forEach(capCloner -> capCloner.accept(oldPlayer, newPlayer, event.isWasDeath()));
+    }
+
+    private interface CloneConsumer {
+        void accept(Player oldPlayer, Player newPlayer, boolean wasDeath);
     }
 }

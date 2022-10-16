@@ -21,7 +21,7 @@ public class ExampleGlobalLevelCapabilityAttacher extends CapabilityAttacher {
     }
 
     public static LazyOptional<ExampleGlobalLevelCapability> getExampleGlobalLevelCapability(Level level) {
-        return level.getCapability(EXAMPLE_GLOBAL_LEVEL_CAPABILITY);
+        return getGlobalLevelCapability(level, EXAMPLE_GLOBAL_LEVEL_CAPABILITY);
     }
 
     private static void attach(AttachCapabilitiesEvent<Level> event, Level level) {
