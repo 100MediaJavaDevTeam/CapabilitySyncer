@@ -9,6 +9,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -39,6 +40,7 @@ public abstract class CapabilityAttacher {
         MinecraftForge.EVENT_BUS.addGenericListener(Entity.class, CapabilityAttacher::onAttachEntityCapability);
         MinecraftForge.EVENT_BUS.addGenericListener(ItemStack.class, CapabilityAttacher::onAttachItemStackCapability);
         MinecraftForge.EVENT_BUS.addGenericListener(Level.class, CapabilityAttacher::onAttachLevelCapability);
+        MinecraftForge.EVENT_BUS.addGenericListener(BlockEntity.class, CapabilityAttacher::onAttachBlockEntityCapability);
         MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onEntityJoinLevel);
         MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onPlayerStartTracking);
         MinecraftForge.EVENT_BUS.addListener(CapabilityAttacher::onPlayerClone);
@@ -86,6 +88,8 @@ public abstract class CapabilityAttacher {
 
     private static final List<BiConsumer<AttachCapabilitiesEvent<Level>, Level>> levelCapAttachers = new ArrayList<>();
     private static final List<Function<Level, LazyOptional<? extends ISyncableCapability>>> levelCapRetrievers = new ArrayList<>();
+    private static final List<BiConsumer<AttachCapabilitiesEvent<BlockEntity>, BlockEntity>> blockEntityCapAttachers = new ArrayList<>();
+    private static final List<Function<BlockEntity, LazyOptional<? extends BlockEntityCapability>>> blockEntityCapRetrievers = new ArrayList<>();
 
     private static final List<BiConsumer<AttachCapabilitiesEvent<ItemStack>, ItemStack>> itemStackCapAttachers = new ArrayList<>();
     private static final List<Function<ItemStack, LazyOptional<? extends ItemStackCapability>>> itemStackCapRetrievers = new ArrayList<>();
@@ -163,6 +167,12 @@ public abstract class CapabilityAttacher {
         itemStackCapRetrievers.add(capRetriever::apply);
     }
 
+    protected static <C extends BlockEntityCapability> void registerBlockEntityAttacher(BiConsumer<AttachCapabilitiesEvent<BlockEntity>, BlockEntity> attacher,
+            Function<BlockEntity, LazyOptional<C>> capRetriever) {
+        blockEntityCapAttachers.add(attacher);
+        blockEntityCapRetrievers.add(capRetriever::apply);
+    }
+
     protected static <I extends INBTSerializable<T>, T extends Tag> void genericAttachCapability(AttachCapabilitiesEvent<?> event, I impl, Capability<I> capability, ResourceLocation location) {
         genericAttachCapability(event, impl, capability, location, true);
     }
@@ -226,6 +236,10 @@ public abstract class CapabilityAttacher {
         itemStackCapAttachers.forEach(attacher -> attacher.accept(event, event.getObject()));
     }
 
+    private static void onAttachBlockEntityCapability(AttachCapabilitiesEvent<BlockEntity> event) {
+        // Attaches the level capabilities
+        blockEntityCapAttachers.forEach(attacher -> attacher.accept(event, event.getObject()));
+    }
     private static void onAttachLevelCapability(AttachCapabilitiesEvent<Level> event) {
         // Attaches the level capabilities
         levelCapAttachers.forEach(attacher -> attacher.accept(event, event.getObject()));
