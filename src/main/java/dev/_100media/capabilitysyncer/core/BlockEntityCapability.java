@@ -1,9 +1,7 @@
 package dev._100media.capabilitysyncer.core;
 
-import dev._100media.capabilitysyncer.network.LevelCapabilityStatusPacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.network.PacketDistributor;
 
 public abstract class BlockEntityCapability implements INBTSavable<CompoundTag> {
     protected final BlockEntity blockEntity;
@@ -11,5 +9,4 @@ public abstract class BlockEntityCapability implements INBTSavable<CompoundTag> 
     protected BlockEntityCapability(BlockEntity blockEntity) {
         this.blockEntity = blockEntity;
     }
-
 }

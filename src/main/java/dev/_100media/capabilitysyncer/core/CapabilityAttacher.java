@@ -88,6 +88,7 @@ public abstract class CapabilityAttacher {
 
     private static final List<BiConsumer<AttachCapabilitiesEvent<Level>, Level>> levelCapAttachers = new ArrayList<>();
     private static final List<Function<Level, LazyOptional<? extends ISyncableCapability>>> levelCapRetrievers = new ArrayList<>();
+
     private static final List<BiConsumer<AttachCapabilitiesEvent<BlockEntity>, BlockEntity>> blockEntityCapAttachers = new ArrayList<>();
     private static final List<Function<BlockEntity, LazyOptional<? extends BlockEntityCapability>>> blockEntityCapRetrievers = new ArrayList<>();
 
@@ -237,9 +238,10 @@ public abstract class CapabilityAttacher {
     }
 
     private static void onAttachBlockEntityCapability(AttachCapabilitiesEvent<BlockEntity> event) {
-        // Attaches the level capabilities
+        // Attaches the block entity capabilities
         blockEntityCapAttachers.forEach(attacher -> attacher.accept(event, event.getObject()));
     }
+
     private static void onAttachLevelCapability(AttachCapabilitiesEvent<Level> event) {
         // Attaches the level capabilities
         levelCapAttachers.forEach(attacher -> attacher.accept(event, event.getObject()));
