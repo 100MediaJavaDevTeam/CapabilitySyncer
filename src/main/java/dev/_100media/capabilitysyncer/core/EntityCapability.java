@@ -13,7 +13,7 @@ public abstract class EntityCapability implements ISyncableCapability {
 
     @Override
     public void updateTracking() {
-        if (this.entity.level.isClientSide)
+        if (this.entity.level().isClientSide)
             return;
         getNetworkChannel().send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> this.entity), this.createUpdatePacket());
     }

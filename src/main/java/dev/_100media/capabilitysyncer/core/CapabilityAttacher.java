@@ -253,7 +253,7 @@ public abstract class CapabilityAttacher {
             entityCapRetrievers.forEach(capRetriever -> capRetriever.apply(player).ifPresent(cap -> cap.sendUpdatePacketToPlayer(player)));
 
             // Sync level capabilities to a player when they join that level
-            levelCapRetrievers.forEach(capRetriever -> capRetriever.apply(player.level).ifPresent(cap -> cap.sendUpdatePacketToPlayer(player)));
+            levelCapRetrievers.forEach(capRetriever -> capRetriever.apply(player.level()).ifPresent(cap -> cap.sendUpdatePacketToPlayer(player)));
         }
     }
 
