@@ -30,8 +30,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -61,7 +61,7 @@ public abstract class CapabilityAttacher {
         modBus.addListener(CapabilityAttacher::onRegisterCapabilities);
     }
 
-    private static final List<Class<?>> capClasses = new ArrayList<>();
+    private static final Queue<Class<?>> capClasses = new ConcurrentLinkedQueue<>();
 
     @NotNull
     protected static <T> Capability<T> getCapability(CapabilityToken<T> type) {
@@ -83,19 +83,19 @@ public abstract class CapabilityAttacher {
         return server.overworld().getCapability(capability);
     }
 
-    private static final List<BiConsumer<AttachCapabilitiesEvent<Entity>, Entity>> entityCapAttachers = new ArrayList<>();
-    private static final List<Function<Entity, LazyOptional<? extends ISyncableCapability>>> entityCapRetrievers = new ArrayList<>();
+    private static final Queue<BiConsumer<AttachCapabilitiesEvent<Entity>, Entity>> entityCapAttachers = new ConcurrentLinkedQueue<>();
+    private static final Queue<Function<Entity, LazyOptional<? extends ISyncableCapability>>> entityCapRetrievers = new ConcurrentLinkedQueue<>();
 
-    private static final List<BiConsumer<AttachCapabilitiesEvent<Level>, Level>> levelCapAttachers = new ArrayList<>();
-    private static final List<Function<Level, LazyOptional<? extends ISyncableCapability>>> levelCapRetrievers = new ArrayList<>();
+    private static final Queue<BiConsumer<AttachCapabilitiesEvent<Level>, Level>> levelCapAttachers = new ConcurrentLinkedQueue<>();
+    private static final Queue<Function<Level, LazyOptional<? extends ISyncableCapability>>> levelCapRetrievers = new ConcurrentLinkedQueue<>();
 
-    private static final List<BiConsumer<AttachCapabilitiesEvent<BlockEntity>, BlockEntity>> blockEntityCapAttachers = new ArrayList<>();
-    private static final List<Function<BlockEntity, LazyOptional<? extends BlockEntityCapability>>> blockEntityCapRetrievers = new ArrayList<>();
+    private static final Queue<BiConsumer<AttachCapabilitiesEvent<BlockEntity>, BlockEntity>> blockEntityCapAttachers = new ConcurrentLinkedQueue<>();
+    private static final Queue<Function<BlockEntity, LazyOptional<? extends BlockEntityCapability>>> blockEntityCapRetrievers = new ConcurrentLinkedQueue<>();
 
-    private static final List<BiConsumer<AttachCapabilitiesEvent<ItemStack>, ItemStack>> itemStackCapAttachers = new ArrayList<>();
-    private static final List<Function<ItemStack, LazyOptional<? extends ItemStackCapability>>> itemStackCapRetrievers = new ArrayList<>();
+    private static final Queue<BiConsumer<AttachCapabilitiesEvent<ItemStack>, ItemStack>> itemStackCapAttachers = new ConcurrentLinkedQueue<>();
+    private static final Queue<Function<ItemStack, LazyOptional<? extends ItemStackCapability>>> itemStackCapRetrievers = new ConcurrentLinkedQueue<>();
 
-    private static final List<CloneConsumer> playerCapCloners = new ArrayList<>();
+    private static final Queue<CloneConsumer> playerCapCloners = new ConcurrentLinkedQueue<>();
 
     protected static <C extends ISyncableCapability> void registerPlayerAttacher(BiConsumer<AttachCapabilitiesEvent<Entity>, Player> attacher,
             Function<Player, LazyOptional<C>> capRetriever, boolean copyOnDeath) {
